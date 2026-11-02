@@ -24,10 +24,16 @@ export async function connetToMongodb() {
     }
 }
 
-await connetToMongodb();
+const connectedClient = await connetToMongodb();
+const db = connectedClient.db('friendly_library');
+const bookData = db.collection('book_data');
+
+
+const cursor = bookData.find({});
+const allBook = await cursor.toArray();
 
 app.get('/', (req, res) => {
-    res.send('hellow data')
+    res.send(allBook);
 });
 
 app.listen(port, () => {
