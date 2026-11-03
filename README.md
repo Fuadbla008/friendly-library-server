@@ -1,6 +1,6 @@
-# BookNook API
+# Friendly Library API
 
-The server side of **BookNook**, a small shared online library. Readers browse
+The server side of **Friendly Library**, a small shared online library. Readers browse
 books, add their own copies, borrow a book for 14 days, and return it.
 
 - Express 5 + MongoDB (native driver, ESM)
