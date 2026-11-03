@@ -1,12 +1,21 @@
 {
   "name": "friendly-library-server",
   "version": "1.0.0",
-  "description": "",
+  "description": "BookNook Express + MongoDB API for books, borrows, and JWT-protected routes",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "check": "node --check index.js && node --check src/app.js && node --check src/config.js && node --check src/db.js && node --check src/auth.js && node --check src/validation.js && node --check src/serializers.js && node --check src/routes/books.js && node --check src/routes/borrows.js",
+    "test": "node --test",
+    "make-token": "node scripts/make-token.mjs",
+    "smoke": "node scripts/smoke.mjs"
   },
-  "keywords": [],
+  "keywords": [
+    "booknook",
+    "express",
+    "mongodb"
+  ],
   "author": "",
   "license": "ISC",
   "type": "module",
@@ -14,6 +23,7 @@
     "cors": "^2.8.6",
     "dotenv": "^18.0.9",
     "express": "^5.3.0",
+    "jose": "^6.2.15",
     "mongodb": "^7.8.0",
     "nodemon": "^3.1.14"
   }
