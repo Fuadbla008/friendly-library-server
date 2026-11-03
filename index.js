@@ -1,41 +1,38 @@
-import express from 'express';
-import { MongoClient } from 'mongodb';
-import cors from 'cors';
-import 'dotenv/config'
+import app from './src/app.js';
+import { config } from './src/config.js';
+import { closeDb, getDb } from './src/db.js';
 
-const app = express();
-const port = process.env.PORT || 5000;
+async function start() {
+  // Connect (and create indexes) before accepting traffic so the first
+  // request never pays the connection cost or races index creation.
+  await getDb();
 
-app.use(cors());
-app.use(express.json());
+  const server = app.listen(config.port, () => {
+    console.log(`BookNook API listening on http://localhost:${config.port}`);
+  });
 
-console.log(process.env.MONGODB_USER);
+  let shuttingDown = false;
+  async function shutdown(signal) {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    console.log(`${signal} received; shutting down.`);
 
-const client = new MongoClient(`mongodb://${process.env.MONGODB_USER}:${process.env.MONGODB_PASS}@ac-nkhxgqo-shard-00-00.z4m5int.mongodb.net:27017,ac-nkhxgqo-shard-00-01.z4m5int.mongodb.net:27017,ac-nkhxgqo-shard-00-02.z4m5int.mongodb.net:27017/?ssl=true&replicaSet=atlas-inuk23-shard-0&authSource=admin`);
+    const force = setTimeout(() => process.exit(1), 10000);
+    force.unref();
 
-export async function connetToMongodb() {
-    try{
-        await client.connect();
-        console.log("succesfully connected to mongodb database");
-        return client;
-    }
-    catch (err){
-        console.dir(err);
-    }
+    server.close(async () => {
+      await closeDb();
+      process.exit(0);
+    });
+  }
+
+  process.on('SIGINT', () => shutdown('SIGINT'));
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
 }
 
-const connectedClient = await connetToMongodb();
-const db = connectedClient.db('friendly_library');
-const bookData = db.collection('book_data');
-
-
-const cursor = bookData.find({});
-const allBook = await cursor.toArray();
-
-app.get('/', (req, res) => {
-    res.send(allBook);
-});
-
-app.listen(port, () => {
-    console.log('server is running on port 5000')
+start().catch(async (error) => {
+  console.error('BookNook API failed to start.');
+  console.error(error);
+  await closeDb().catch(() => {});
+  process.exit(1);
 });
